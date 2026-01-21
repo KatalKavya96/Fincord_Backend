@@ -10,5 +10,101 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
+}
+
+
+enum orgRole {
+
+  OWNER
+  ADMIN
+  ACCOUNTANT
+  VIEWER
+}
+
+enum memberStatus{
+
+  INVITED
+  ACTIVE
+}
+
+enum entityContactType {
+
+  INDIVIDUAL
+  BUSINESS
+}
+
+model user {
+
+  id Int @id @default(autoIncrement())
+  email String @unique @db.VarChar(191)
+  phone String? @db.VarChar(32)
+  passwordHash String @db.VarChar(100)
+  createdAt dateTime @default(now())
+  updatedAt dateTime @updatedAt
+
+
+}
+
+model profile {
+
+  id Int @id @default(autoIncrement())
+  userId Int @unique
+  fullName String? @db.VarChar(100)
+  avatarUrl String? @db.VarChar(100)
+  gender String? @db.VarChar(32)
+  country String? @db.VarChar(32)
+  language String? @db.VarChar(32)
+  timezone String? @db.VarChar(100)
+  createdAt dateTime @default(now())
+  updatedAt dateTime @updatedAt
+}
+
+model organization {
+
+  id Int @id @default(autoIncrement())
+  name String @db.VarChar(100)
+  baseCurrency String @db.VarChar(100)
+  timezone String? @db.VarChar(100)
+  createdAt dateTime @default(now())
+  updatedAt dateTime @updatedAt
+
+}
+
+model organizationMember {
+
+  id Int @id @default(autoIncrement())
+  orgId Int
+  userId Int
+  role String @db.VarChar(100)
+  status String @db.VarChar(100)
+  createdAt dateTime @default(now())
+
+}
+
+model contacts {
+
+  id Int @id @default(autoIncrement())
+  orgId Int
+
+  entityType String @db.VarChar(100)
+  isVendor Boolean @default(false)
+  isCustomer Boolean @default(false)
+
+  displayName String @db.VarChar(100)
+  firstName String? @db.VarChar(100)
+  lastName String? @db.VarChar(100)
+  companyName String? @db.VarChar(100)
+
+  phone String? @db.VarChar(100)
+  email String? @db.VarChar(100)
+  taxId String? @db.VarChar(100)
+
+  billingAddress String? @db.VarChar(100)
+  shippingAddress String? @db.VarChar(100)
+
+  createdAt dateTime @default(now())
+  updatedAt dateTime @updatedAt
+
+
 }
