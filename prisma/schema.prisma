@@ -13,98 +13,104 @@ datasource db {
   provider = "mysql"
 }
 
-
 enum orgRole {
-
   OWNER
   ADMIN
   ACCOUNTANT
   VIEWER
 }
 
-enum memberStatus{
-
+enum memberStatus {
   INVITED
   ACTIVE
 }
 
 enum entityContactType {
-
   INDIVIDUAL
   BUSINESS
 }
 
 model user {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique @db.VarChar(191)
+  phone        String?  @db.VarChar(32)
+  passwordHash String   @db.VarChar(100)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  id Int @id @default(autoIncrement())
-  email String @unique @db.VarChar(191)
-  phone String? @db.VarChar(32)
-  passwordHash String @db.VarChar(100)
-  createdAt dateTime @default(now())
-  updatedAt dateTime @updatedAt
-
-
+  Profile     profile?
+  memberships organizationMember[]
 }
 
 model profile {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  fullName  String?  @db.VarChar(100)
+  avatarUrl String?  @db.VarChar(100)
+  gender    String?  @db.VarChar(32)
+  country   String?  @db.VarChar(32)
+  language  String?  @db.VarChar(32)
+  timezone  String?  @db.VarChar(100)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  id Int @id @default(autoIncrement())
-  userId Int @unique
-  fullName String? @db.VarChar(100)
-  avatarUrl String? @db.VarChar(100)
-  gender String? @db.VarChar(32)
-  country String? @db.VarChar(32)
-  language String? @db.VarChar(32)
-  timezone String? @db.VarChar(100)
-  createdAt dateTime @default(now())
-  updatedAt dateTime @updatedAt
+  users user @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model organization {
+  id           Int      @id @default(autoincrement())
+  name         String   @db.VarChar(100)
+  baseCurrency String   @db.VarChar(100)
+  timezone     String?  @db.VarChar(100)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  id Int @id @default(autoIncrement())
-  name String @db.VarChar(100)
-  baseCurrency String @db.VarChar(100)
-  timezone String? @db.VarChar(100)
-  createdAt dateTime @default(now())
-  updatedAt dateTime @updatedAt
-
+  members organizationMember[]
+  contact contacts[]
 }
 
 model organizationMember {
+  id        Int      @id @default(autoincrement())
+  orgId     Int
+  userId    Int
+  role      String   @db.VarChar(100)
+  status    String   @db.VarChar(100)
+  createdAt DateTime @default(now())
 
-  id Int @id @default(autoIncrement())
-  orgId Int
-  userId Int
-  role String @db.VarChar(100)
-  status String @db.VarChar(100)
-  createdAt dateTime @default(now())
+  org   organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  users user         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([orgId, userId])
+  @@index([userId])
+  @@index([orgId])
 }
 
 model contacts {
-
-  id Int @id @default(autoIncrement())
+  id    Int @id @default(autoincrement())
   orgId Int
 
-  entityType String @db.VarChar(100)
-  isVendor Boolean @default(false)
+  entityType String  @db.VarChar(100)
+  isVendor   Boolean @default(false)
   isCustomer Boolean @default(false)
 
-  displayName String @db.VarChar(100)
-  firstName String? @db.VarChar(100)
-  lastName String? @db.VarChar(100)
+  displayName String  @db.VarChar(100)
+  firstName   String? @db.VarChar(100)
+  lastName    String? @db.VarChar(100)
   companyName String? @db.VarChar(100)
 
   phone String? @db.VarChar(100)
   email String? @db.VarChar(100)
   taxId String? @db.VarChar(100)
 
-  billingAddress String? @db.VarChar(100)
+  billingAddress  String? @db.VarChar(100)
   shippingAddress String? @db.VarChar(100)
 
-  createdAt dateTime @default(now())
-  updatedAt dateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
+  org organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
 
+  @@unique([orgId, email])
+  @@unique([orgId, phone])
+  @@index([orgId])
 }
